@@ -1,11 +1,6 @@
 import { model, Schema } from "mongoose";
 
 const bookingSchema = new Schema({
-  departureCity: { type: String, required: true },
-  arrivalCity: { type: String, required: true },
-  departureTime: { type: String, required: true },
-  arrivalTime: { type: String, required: true },
-  date: { type: Date, required: true },
   paymentMethod: { type: String, enum: ["momo", "visa"], required: true },
   dependants: [
     {

@@ -7,11 +7,8 @@ const userSchema = new Schema(
     lastName: { type: String },
     email: { type: String, lowercase: true, unique: true },
     userName: { type: String, lowercase: true, unique: true },
-    userType: { type: String, enum: ["vendor", "customer"] },
     phoneNumber: { type: String, unique: true },
     password: { type: String },
-    resetToken: { type: String },
-    resetTokenExpiresAt: { type: Date },
     bookings: [{ type: Types.ObjectId, ref: "Booking" }],
   },
   {
@@ -19,6 +16,22 @@ const userSchema = new Schema(
   }
 );
 
+const resetTokenSchema = new Schema(
+  {
+    userId: { type: Types.ObjectId, required: true, ref: "User" },
+    expired: { type: Boolean, default: false },
+    expiresAt: {
+      type: Date,
+      default: () => new Date().setHours(new Date().getHours() + 2),
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 userSchema.plugin(toJSON);
+resetTokenSchema.plugin(toJSON);
 
 export const UserModel = model("User", userSchema);
+export const ResetTokenModel = model("ResetToken", resetTokenSchema);
