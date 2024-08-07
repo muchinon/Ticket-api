@@ -14,4 +14,6 @@ export const bookingSchema = Joi.object({
     name: Joi.string(),
     email: Joi.string().email(),
   }),
+
+  bus: Joi.string(),
 });
