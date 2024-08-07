@@ -15,6 +15,10 @@ export const busSchema = Joi.object({
 
   arrivalCity: Joi.string().required().max(255),
 
+  departureTime: Joi.string().required().max(255),
+
+  arrivalTime: Joi.string().required().max(255),
+
   ticketPrice: Joi.string().required().max(255),
 
   discount: Joi.string().valid("10%", "20%"),
