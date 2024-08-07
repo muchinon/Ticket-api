@@ -189,6 +189,15 @@ export const getABus = async (req, res, next) => {
   }
 };
 
+export const getAllBuses = async (req, res, next) => {
+  try {
+    const allBuses = await BusModel.find();
+    res.status(200).send(allBuses);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateBus = async (req, res, next) => {
   // const { error, value } = busSchema.validate(req.body);
   // if (error) {

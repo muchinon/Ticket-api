@@ -5,6 +5,7 @@ import {
   deleteBus,
   forgotPassword,
   getABus,
+  getAllBuses,
   resetPassword,
   signUp,
   token,
@@ -35,3 +36,6 @@ operatorRouter.get("/operator/buses/:id", isAuthenticated, getABus);
 operatorRouter.patch("/operator/buses/:id", isAuthenticated, updateBus);
 
 operatorRouter.delete("/operator/buses/:id", isAuthenticated, deleteBus);
+
+// Get all buses
+operatorRouter.get("/operator/buses", getAllBuses);
