@@ -25,7 +25,7 @@ expressOasGenerator.handleResponses(app, {
 app.use(
   cors({
     credentials: true,
-    origin: process.env.ALLOWED_DOMAINS?.split(",") || [],
+    origin: "*",
   })
 );
 app.use(express.json());
