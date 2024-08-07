@@ -3,6 +3,7 @@ import {
   addBooking,
   deleteBooking,
   getABooking,
+  getAllBooking,
   updateBooking,
 } from "../controllers/booking_controller.js";
 import { isAuthenticated } from "../middlewares/auth.js";
@@ -10,6 +11,8 @@ import { isAuthenticated } from "../middlewares/auth.js";
 export const bookingRouter = Router();
 
 bookingRouter.post("/users/bookings", isAuthenticated, addBooking);
+
+bookingRouter.get("/users/bookings", isAuthenticated, getAllBooking);
 
 bookingRouter.get("/users/bookings/:id", isAuthenticated, getABooking);
 

@@ -41,6 +41,16 @@ export const getABooking = async (req, res, next) => {
   }
 };
 
+export const getAllBooking = async (req, res, next) => {
+  try {
+    const userId = req.session?.user?.id || req?.user?.id;
+    const allBooking = await BookingModel.find({ user: userId });
+    res.json(allBooking);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateBooking = async (req, res, next) => {
   const { error, value } = bookingSchema.validate(req.body);
   if (error) {
