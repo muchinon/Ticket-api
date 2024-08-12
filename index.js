@@ -10,6 +10,7 @@ import { userRouter } from "./routes/user_route.js";
 
 import { bookingRouter } from "./routes/booking_route.js";
 import { operatorRouter } from "./routes/operator_route.js";
+import { busRouter } from "./routes/bus_route.js";
 
 const app = express();
 
@@ -44,6 +45,7 @@ app.use(
 app.use(userRouter);
 app.use(operatorRouter);
 app.use(bookingRouter);
+app.use(busRouter);
 expressOasGenerator.handleRequests();
 app.use((req, res) => res.redirect("/api-docs/"));
 app.use(errorHandler({ log: false }));

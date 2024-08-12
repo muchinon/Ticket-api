@@ -22,4 +22,11 @@ export const busSchema = Joi.object({
   ticketPrice: Joi.string().required().max(255),
 
   discount: Joi.string().valid("10%", "20%"),
+
+  seats: Joi.array().items(
+    Joi.object({
+      number: Joi.number(),
+      isBooked: Joi.boolean(),
+    })
+  ),
 });
