@@ -61,7 +61,7 @@ export const token = async (req, res, next) => {
           user: {
             firstName: user.firstName,
             lastName: user.lastName,
-            username: user.username,
+            userName: user.userName,
           },
         });
       }
