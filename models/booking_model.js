@@ -12,6 +12,8 @@ const bookingSchema = new Schema({
     name: { type: String },
     email: { type: String },
   },
+  seat: { type: Number, required: true }, // Add seat field
+
   user: { type: Schema.Types.ObjectId, ref: "User" },
   bus: { type: Schema.Types.ObjectId, ref: "Bus" },
 });

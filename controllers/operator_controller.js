@@ -169,9 +169,16 @@ export const addBus = async (req, res, next) => {
       return res.status(404).send("User not found");
     }
 
+    // Initialize seats array based on capacity
+    const seats = Array.from({ length: value.capacity }, (_, index) => ({
+      number: index + 1,
+      isBooked: false,
+    }));
+
     const createBus = await BusModel.create({
       ...value,
-      user: id,
+      seats,
+      operator: id,
     });
 
     user.buses.push(createBus._id);

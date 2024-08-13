@@ -1,5 +1,6 @@
 import { BookingModel } from "../models/booking_model.js";
 import { UserModel } from "../models/user_model.js";
+import { BusModel } from "../models/bus_model.js";
 import { bookingSchema } from "../schema/booking_schema.js";
 
 export const addBooking = async (req, res, next) => {
@@ -10,12 +11,24 @@ export const addBooking = async (req, res, next) => {
     }
 
     const id = req.session?.user?.id || req?.user?.id;
-    console.log(id);
     const user = await UserModel.findById(id).populate("bookings");
 
     if (!user) {
       return res.status(404).send("User not found");
     }
+
+    const bus = await BusModel.findById(value.bus);
+    if (!bus) {
+      return res.status(404).send("Bus not found");
+    }
+
+    const seatToBook = bus.seats.find((seat) => seat.number === value.seat);
+    if (!seatToBook || seatToBook.isBooked) {
+      return res.status(400).send("Selected seat is not available");
+    }
+
+    // Mark the seat as booked
+    seatToBook.isBooked = true;
 
     const createBooking = await BookingModel.create({
       ...value,
@@ -23,8 +36,8 @@ export const addBooking = async (req, res, next) => {
     });
 
     user.bookings.push(createBooking._id);
-
     await user.save();
+    await bus.save();
 
     res.status(201).json({ message: "Booking confirmed" });
   } catch (error) {
