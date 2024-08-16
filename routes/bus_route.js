@@ -1,6 +1,9 @@
 import { Router } from "express";
-import { getAllBuses } from "../controllers/operator_controller.js";
-import { getBusDetails, getBusSeats } from "../controllers/bus_controller.js";
+import {
+  getAllBuses,
+  getBusDetails,
+  getBusSeats,
+} from "../controllers/bus_controller.js";
 
 export const busRouter = Router();
 
