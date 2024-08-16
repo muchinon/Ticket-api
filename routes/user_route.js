@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   forgotPassword,
+  getAUser,
   resetPassword,
   signUp,
   token,
@@ -18,3 +19,5 @@ userRouter.post("/api/auth/users/forgot-password", forgotPassword);
 userRouter.post("/api/auth/users/reset-token/:id", verifyResetToken);
 
 userRouter.post("/api/auth/users/reset-password", resetPassword);
+
+userRouter.get("/api/auth/user/:id", getAUser);

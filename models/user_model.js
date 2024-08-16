@@ -9,7 +9,7 @@ const userSchema = new Schema(
     userName: { type: String, lowercase: true, unique: true },
     phoneNumber: { type: String, unique: true },
     password: { type: String },
-    bookings: [{ type: Types.ObjectId, ref: "Booking" }],
+    bookings: [{ type: Number }],
   },
   {
     timestamps: true,

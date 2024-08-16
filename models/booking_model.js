@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 
 const bookingSchema = new Schema({
-  paymentMethod: { type: String, enum: ["momo", "visa"], required: true },
   dependants: [
     {
       name: { type: String, required: true },
@@ -12,7 +11,7 @@ const bookingSchema = new Schema({
     name: { type: String },
     email: { type: String },
   },
-  seat: { type: Number, required: true }, // Add seat field
+  seats: [{ type: Number, required: true }],
 
   user: { type: Schema.Types.ObjectId, ref: "User" },
   bus: { type: Schema.Types.ObjectId, ref: "Bus" },

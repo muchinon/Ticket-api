@@ -12,8 +12,13 @@ const busSchema = new Schema({
   departureTime: { type: String, required: true },
   arrivalTime: { type: String, required: true },
   ticketPrice: { type: String },
-  discount: { type: String, enum: ["10%", "20%"] },
-  seats: [{ number: Number, isBooked: Boolean }],
+  seats: [
+    {
+      number: Number,
+      isBooked: Boolean,
+      userId: { type: Schema.Types.ObjectId, ref: "User" }, // Added userId field
+    },
+  ],
   operator: { type: Schema.Types.ObjectId, ref: "Operator" },
 });
 

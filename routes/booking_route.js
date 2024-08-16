@@ -10,12 +10,12 @@ import { isAuthenticated } from "../middlewares/auth.js";
 
 export const bookingRouter = Router();
 
-bookingRouter.post("/users/bookings", isAuthenticated, addBooking);
+bookingRouter.post("/api/users/bookings", isAuthenticated, addBooking);
 
-bookingRouter.get("/users/bookings", isAuthenticated, getAllBooking);
+bookingRouter.get("/api/users/bookings", isAuthenticated, getAllBooking);
 
-bookingRouter.get("/users/bookings/:id", isAuthenticated, getABooking);
+bookingRouter.get("/api/users/bookings/:id", isAuthenticated, getABooking);
 
-bookingRouter.patch("/users/bookings/:id", isAuthenticated, updateBooking);
+bookingRouter.patch("/api/users/bookings/:id", isAuthenticated, updateBooking);
 
-bookingRouter.delete("/users/bookings/:id", isAuthenticated, deleteBooking);
+bookingRouter.delete("/api/users/bookings/:id", isAuthenticated, deleteBooking);

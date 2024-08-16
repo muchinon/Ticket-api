@@ -193,7 +193,20 @@ export const addBus = async (req, res, next) => {
 
 export const getABus = async (req, res, next) => {
   try {
-    const aBus = await BusModel.findById(req.params.id);
+    const operatorId = req.session?.user?.id || req?.user?.id; // Assuming the operator's ID is stored in req.user.id
+
+    // Find the bus and check if it belongs to the operator
+    const aBus = await BusModel.findOne({
+      _id: req.params.id,
+      operator: operatorId, // Check if the operator field matches
+    });
+
+    if (!aBus) {
+      return res.status(404).send({
+        message: "Bus not found or you do not have permission to access it.",
+      });
+    }
+
     res.status(200).send(aBus);
   } catch (error) {
     next(error);
@@ -202,8 +215,16 @@ export const getABus = async (req, res, next) => {
 
 export const getAllBuses = async (req, res, next) => {
   try {
-    const allBuses = await BusModel.find();
-    res.status(200).send(allBuses);
+    const operatorId = req.session?.user?.id || req?.user?.id;
+
+    // Find the operator by their ID and populate the 'buses' field
+    const operator = await OperatorModel.findById(operatorId).populate("buses");
+
+    if (!operator) {
+      return res.status(404).send({ message: "Operator not found" });
+    }
+
+    res.status(200).send(operator.buses);
   } catch (error) {
     next(error);
   }
