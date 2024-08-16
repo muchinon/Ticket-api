@@ -5,6 +5,7 @@ import {
   deleteBus,
   forgotPassword,
   getAllBuses,
+  getUser,
   resetPassword,
   signUp,
   token,
@@ -27,6 +28,8 @@ operatorRouter.post("/api/auth/operator/reset-token/:id", verifyResetToken);
 operatorRouter.post("/api/auth/operator/reset-password", resetPassword);
 
 // Operator CRUD operations
+
+operatorRouter.get("/api/operator/:username", isAuthenticated, getUser);
 
 operatorRouter.post("/api/operator/buses", isAuthenticated, addBus);
 

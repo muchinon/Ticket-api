@@ -7,6 +7,8 @@ export const operatorSchema = Joi.object({
 
   email: Joi.string().lowercase().email().required(),
 
+  userName: Joi.string().required(),
+
   companyName: Joi.string().required().max(255),
 
   contactNumber: Joi.string()

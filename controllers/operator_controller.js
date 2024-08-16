@@ -154,6 +154,27 @@ export const resetPassword = async (req, res, next) => {
   res.status(200).json("Password Reset Successfully");
 };
 
+export const getUser = async (req, res, next) => {
+  try {
+    const userName = req.params.username.toLowerCase();
+    const options = { sort: { startDate: -1 } };
+    const operatorDetails = await OperatorModel.findOne({ userName })
+      .select("-password")
+      .populate({
+        path: "buses",
+        options,
+      });
+
+    if (!operatorDetails) {
+      return res.status(404).json({ message: "Operator not found" });
+    }
+
+    return res.status(200).json({ operator: operatorDetails });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const addBus = async (req, res, next) => {
   try {
     const { error, value } = busSchema.validate(req.body);
