@@ -13,6 +13,7 @@ import { operatorRouter } from "./routes/operator_route.js";
 import { busRouter } from "./routes/bus_route.js";
 import { paymentRouter } from "./routes/payment_route.js";
 import bodyParser from "body-parser";
+import { restartServer } from "./restart_server.js";
 
 const app = express();
 
@@ -23,6 +24,8 @@ expressOasGenerator.handleResponses(app, {
   tags: ["users", "operator", "bookings"],
   mongooseModels: mongoose.modelNames(),
 });
+
+const PORT = process.env.PORT || 2900;
 
 // middlewares
 app.use(
@@ -43,6 +46,9 @@ app.use(
     }),
   })
 );
+app.get("/api/health", (req, res) => {
+  res.json({ status: "UP" });
+});
 
 // routes
 app.use(userRouter);
@@ -54,8 +60,20 @@ expressOasGenerator.handleRequests();
 app.use((req, res) => res.redirect("/api-docs/"));
 app.use(errorHandler({ log: false }));
 
-// Listen for incoming request
-const port = process.env.PORT || 2900;
-app.listen(port, () => {
-  console.log(`App is listening on port ${port}`);
-});
+const reboot = async () => {
+  setInterval(restartServer, process.env.INTERVAL);
+};
+
+dbConnection()
+  .then(() => {
+    app.listen(PORT, () => {
+      reboot().then(() => {
+        console.log(`Server Restarted`);
+      });
+      console.log(`Server is connected to Port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.log(err);
+    process.exit(-1);
+  });
