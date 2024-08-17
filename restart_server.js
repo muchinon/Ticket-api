@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = process.env.APP_URL;
+const url = process.env.API_URL;
 const healthCheckUrl = `${url}/api/health`; // Replace with your actual health endpoint URL
 
 export const restartServer = async () => {
