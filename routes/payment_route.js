@@ -6,6 +6,7 @@ import {
   handleWebhook,
 } from "../controllers/payment_controller.js";
 import { isAuthenticated } from "../middlewares/auth.js";
+import { ipWhitelistingMiddleware } from "../middlewares/paystack.js";
 
 export const paymentRouter = Router();
 
@@ -17,6 +18,7 @@ paymentRouter.post(
 
 paymentRouter.post(
   "/api/paystack/webhook",
+  ipWhitelistingMiddleware,
   bodyParser.raw({ type: "application/json" }),
   handleWebhook
 );

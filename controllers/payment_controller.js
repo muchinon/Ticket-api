@@ -4,6 +4,7 @@ import { OrderModel } from "../models/order_model.js";
 import { BusModel } from "../models/bus_model.js";
 import { UserModel } from "../models/user_model.js";
 import { BookingModel } from "../models/booking_model.js";
+import { transporter } from "../config/mail.js";
 
 export const createPayment = async (req, res) => {
   try {
@@ -26,6 +27,8 @@ export const createPayment = async (req, res) => {
         amount: amount * 100, // Paystack expects amount in kobo
         metadata: {
           seats: selectedSeats,
+          userId: req.session?.user?.id || req?.user?.id,
+          busId,
         },
       },
       {
@@ -37,51 +40,52 @@ export const createPayment = async (req, res) => {
 
     const authorizationUrl = response.data.data.authorization_url;
 
-    // Find the user by email
-    const user = await UserModel.findOne({ email });
+    // Create a new booking
+    const userId = req.session?.user?.id || req?.user?.id;
+    const user = await UserModel.findById(userId);
+
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).send("User not found");
     }
 
-    // Update the isBooked status of the selected seats
-    const updatePromises = selectedSeats.map(async (seatNumber) => {
-      try {
-        // Log for debugging
-        console.log(`Updating seat number: ${seatNumber} for busId: ${busId}`);
+    const bus = await BusModel.findById(busId);
+    if (!bus) {
+      return res.status(404).send("Bus not found");
+    }
 
-        // Update seat status
-        const updateResult = await BusModel.updateOne(
-          { _id: busId, "seats.number": seatNumber },
-          { $set: { "seats.$.isBooked": true, "seats.$.userId": user._id } }
-        );
+    const seatsToBook = bus.seats.filter((seat) =>
+      selectedSeats.includes(seat.number)
+    );
 
-        if (updateResult.nModified === 0) {
-          console.warn(`No seats updated for seat number: ${seatNumber}`);
-        } else {
-          console.log(
-            `Seat updated successfully for seat number: ${seatNumber}`
-          );
-        }
-      } catch (error) {
-        console.error(`Error updating seat number: ${seatNumber}`, error);
-        throw error; // Re-throw to ensure Promise.all catches it
-      }
+    if (seatsToBook.some((seat) => seat.isBooked)) {
+      return res
+        .status(400)
+        .send("One or more selected seats are not available");
+    }
+
+    // Mark the seats as booked
+    seatsToBook.forEach((seat) => {
+      seat.isBooked = true;
+      seat.userId = userId;
     });
 
-    await Promise.all(updatePromises);
-
-    // Create booking entry with optional dependants and guest fields
-    const bookingData = {
+    const newBooking = await BookingModel.create({
+      dependants,
+      guest,
       seats: selectedSeats,
-      user: user._id,
-      bus: busId, // Include the chosen busId
-      ...(dependants && { dependants }), // Include dependants if present
-      ...(guest && { guest }), // Include guest if present
-    };
+      user: userId,
+      bus: busId,
+    });
 
-    const booking = await BookingModel.create(bookingData);
+    user.bookings.push(newBooking._id); // Push the new booking ID into the user's bookings array
+    await user.save(); // Save the user document
 
-    res.json({ authorizationUrl, booking });
+    await bus.save(); // Save the bus document
+
+    res.status(201).json({
+      message: "Payment initialized and booking created",
+      authorizationUrl,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -90,44 +94,68 @@ export const createPayment = async (req, res) => {
 
 export const handleWebhook = async (req, res) => {
   try {
-    // Parse the request body as JSON
-    const body = req.body.toString();
-    const jsonData = JSON.parse(body);
+    const event = req.body.event;
 
-    const hash = crypto
-      .createHmac("sha512", process.env.PAYSTACK_SECRET)
-      .update(body, "utf-8")
-      .digest("hex");
+    if (event === "charge.success") {
+      const { metadata, requested_amount, gateway_response } = req.body.data;
 
-    if (hash == req.headers["x-paystack-signature"]) {
-      const event = jsonData.event;
-
-      // Handle different Paystack events based on the `event` field
-      if (event === "charge.success") {
-        const newOrder = new OrderModel({
-          seatNumber: jsonData.data.seatNumber,
-          status: jsonData.data.metadata.status,
-          totalAmount: jsonData.data.requested_amount,
-          paymentStatus: jsonData.data.gateway_response,
-        });
-
-        await newOrder.save();
-
-        res.status(200).send("Success");
-        console.log("Order saved to database");
-      } else {
-        // Handle other Paystack events if needed
-        console.log("Received Paystack event:", event);
-        res.status(200).send("Event not handled");
+      if (!metadata || !metadata.userId || !metadata.busId || !metadata.seats) {
+        console.log("Missing metadata in webhook");
+        return res.status(400).send("Missing metadata in webhook");
       }
-    } else {
-      // Invalid signature, ignore the webhook event
-      console.log("Invalid Paystack signature");
-      res.status(400).send("Invalid signature");
+
+      const { userId, busId, seats } = metadata;
+
+      // Create and save the new order
+      const newOrder = await OrderModel.create({
+        user: userId,
+        bus: busId,
+        seatNumber: seats, // Adjust as necessary
+        status: "confirmed",
+        totalAmount: requested_amount / 100,
+        paymentStatus: gateway_response,
+        paymentDate: new Date(),
+      });
+
+      // Retrieve user details
+      const user = await UserModel.findById(userId);
+
+      if (!user) {
+        console.log("User not found");
+        return res.status(404).send("User not found");
+      }
+
+      // Send email to the user with order details
+      await transporter.sendMail({
+        to: user.email,
+        subject: "Order Confirmation",
+        text: `
+          Dear ${user.firstName},
+
+          Your order has been confirmed with the following details:
+          Seat Number(s): ${seats}
+          Total Amount: ${newOrder.totalAmount}
+          Order ID: ${newOrder._id}
+          Bus ID: ${busId}
+          Payment Status: ${gateway_response}
+          Payment Date: ${newOrder.paymentDate.toISOString()}
+
+          Thank you for your purchase!
+
+          Best regards,
+          Ticketty
+        `,
+      });
+
+      console.log("Order saved to database and email sent:", newOrder);
+      return res.status(200).send("Success");
     }
+
+    console.log("Received Paystack event:", event);
+    return res.status(200).send("Event not handled");
   } catch (error) {
     console.error("Error processing Paystack webhook:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

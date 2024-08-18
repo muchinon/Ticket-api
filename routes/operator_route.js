@@ -12,6 +12,7 @@ import {
   updateBus,
   verifyResetToken,
 } from "../controllers/operator_controller.js";
+import { getOrders } from "../controllers/payment_controller.js";
 
 export const operatorRouter = Router();
 
@@ -38,3 +39,6 @@ operatorRouter.get("/api/operator/buses/:id", isAuthenticated, getAllBuses);
 operatorRouter.patch("/api/operator/buses/:id", isAuthenticated, updateBus);
 
 operatorRouter.delete("/api/operator/buses/:id", isAuthenticated, deleteBus);
+
+// Orders
+operatorRouter.get("/api/operator/orders/:id", isAuthenticated, getOrders);

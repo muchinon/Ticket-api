@@ -10,6 +10,7 @@ import {
   resetPasswordSchema,
 } from "../schema/user_schema.js";
 import { OperatorModel } from "../models/operator_model.js";
+import { OrderModel } from "../models/order_model.js";
 
 export const signUp = async (req, res, next) => {
   try {
@@ -288,4 +289,36 @@ export const deleteBus = async (req, res, next) => {
   user.buses.pull(req.params.id);
   await user.save();
   res.status(200).send("Bus has been deleted successfully");
+};
+
+export const getOrders = async (req, res, next) => {
+  try {
+    // Retrieve the operator ID from the session or user object
+    const operatorId = req.session?.user?.id || req?.user?.id;
+
+    if (!operatorId) {
+      return res.status(400).send({ message: "Operator ID is required" });
+    }
+
+    // Find the operator and populate the buses
+    const operator = await OperatorModel.findById(operatorId).populate("buses");
+
+    if (!operator) {
+      return res.status(404).send({ message: "Operator not found" });
+    }
+
+    // Get the bus IDs from the operator's buses
+    const busIds = operator.buses.map((bus) => bus._id);
+
+    // Find all orders associated with these bus IDs
+    const orders = await OrderModel.find({ bus: { $in: busIds } })
+      .populate("user")
+      .populate("bus")
+      .sort({ createdAt: -1 }); // Sort orders by creation date
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };

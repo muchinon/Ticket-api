@@ -5,17 +5,19 @@ const orderSchema = new Schema(
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     bus: {
       type: Schema.Types.ObjectId,
       ref: "Bus",
+      required: true,
     },
     operator: {
       type: Schema.Types.ObjectId,
       ref: "Operator",
     },
     seatNumber: {
-      type: String,
+      type: [String], // Assuming seats can be an array of seat numbers
       required: true,
     },
     status: {
