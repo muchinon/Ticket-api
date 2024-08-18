@@ -13,6 +13,7 @@ import {
   verifyResetToken,
 } from "../controllers/operator_controller.js";
 import { getOrders } from "../controllers/payment_controller.js";
+import { remoteUpload } from "../middlewares/upload.js";
 
 export const operatorRouter = Router();
 
@@ -32,7 +33,12 @@ operatorRouter.post("/api/auth/operator/reset-password", resetPassword);
 
 operatorRouter.get("/api/operator/:username", isAuthenticated, getUser);
 
-operatorRouter.post("/api/operator/buses", isAuthenticated, addBus);
+operatorRouter.post(
+  "/api/operator/buses",
+  remoteUpload.fields([{ name: "busLogo", maxCount: 1 }]),
+  isAuthenticated,
+  addBus
+);
 
 operatorRouter.get("/api/operator/buses/:id", isAuthenticated, getAllBuses);
 

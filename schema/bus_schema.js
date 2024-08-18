@@ -3,6 +3,8 @@ import Joi from "joi";
 export const busSchema = Joi.object({
   busOperator: Joi.string().required().max(255),
 
+  busLogo: Joi.string(),
+
   busType: Joi.string().valid("Sprinter", "Long bus"),
 
   capacity: Joi.number().required(),

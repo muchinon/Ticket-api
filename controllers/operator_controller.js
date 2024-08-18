@@ -178,7 +178,10 @@ export const getUser = async (req, res, next) => {
 
 export const addBus = async (req, res, next) => {
   try {
-    const { error, value } = busSchema.validate(req.body);
+    const { error, value } = busSchema.validate({
+      ...req.body,
+      busLogo: req.files?.busLogo[0].filename,
+    });
     if (error) {
       return res.status(400).send(error.details[0].message);
     }

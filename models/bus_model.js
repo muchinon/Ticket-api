@@ -3,6 +3,7 @@ import { toJSON } from "@reis/mongoose-to-json";
 
 const busSchema = new Schema({
   busOperator: { type: String, required: true },
+  busLogo: { type: String },
   busType: { type: String, enum: ["Sprinter", "Long bus"], required: true },
   capacity: { type: Number, required: true },
   busNumber: { type: String, required: true },
