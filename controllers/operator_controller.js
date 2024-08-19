@@ -11,6 +11,7 @@ import {
 } from "../schema/user_schema.js";
 import { OperatorModel } from "../models/operator_model.js";
 import { OrderModel } from "../models/order_model.js";
+import { BookingModel } from "../models/booking_model.js";
 
 export const signUp = async (req, res, next) => {
   try {
@@ -323,5 +324,16 @@ export const getOrders = async (req, res, next) => {
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getBooking = async (req, res, next) => {
+  try {
+    const totalBookings = await BookingModel.countDocuments({
+      "seats.isBooked": true,
+    });
+    res.json({ count: totalBookings });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to get bookings" });
   }
 };

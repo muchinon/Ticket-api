@@ -5,6 +5,7 @@ import {
   deleteBus,
   forgotPassword,
   getAllBuses,
+  getBooking,
   getUser,
   resetPassword,
   signUp,
@@ -45,6 +46,12 @@ operatorRouter.get("/api/operator/buses/:id", isAuthenticated, getAllBuses);
 operatorRouter.patch("/api/operator/buses/:id", isAuthenticated, updateBus);
 
 operatorRouter.delete("/api/operator/buses/:id", isAuthenticated, deleteBus);
+
+operatorRouter.get(
+  "/api/operator/buses/bookings/:id",
+  isAuthenticated,
+  getBooking
+);
 
 // Orders
 operatorRouter.get("/api/operator/orders/:id", isAuthenticated, getOrders);

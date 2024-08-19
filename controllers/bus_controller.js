@@ -9,6 +9,23 @@ export const getAllBuses = async (req, res, next) => {
   }
 };
 
+export const searchBuses = async (req, res, next) => {
+  try {
+    // Get query params
+    const { limit = 10, skip = 0, filter = "{}" } = req.query;
+
+    // Get all recipes from database
+    const allBuses = await BusModel.find(JSON.parse(filter))
+      .limit(limit)
+      .skip(skip);
+
+    // Return response
+    res.status(200).json(allBuses);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getBusDetails = async (req, res, next) => {
   try {
     const bus = await BusModel.findById(req.params.busId);
