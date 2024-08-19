@@ -47,11 +47,7 @@ operatorRouter.patch("/api/operator/buses/:id", isAuthenticated, updateBus);
 
 operatorRouter.delete("/api/operator/buses/:id", isAuthenticated, deleteBus);
 
-operatorRouter.get(
-  "/api/operator/buses/bookings/:id",
-  isAuthenticated,
-  getBooking
-);
+operatorRouter.get("/api/operator/buses/bookings", isAuthenticated, getBooking);
 
 // Orders
 operatorRouter.get("/api/operator/orders/:id", isAuthenticated, getOrders);

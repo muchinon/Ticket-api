@@ -329,10 +329,25 @@ export const getOrders = async (req, res, next) => {
 
 export const getBooking = async (req, res, next) => {
   try {
-    const totalBookings = await BookingModel.countDocuments({
-      "seats.isBooked": true,
-    });
-    res.json({ count: totalBookings });
+    const operatorId = req.session?.user?.id || req?.user?.id;
+
+    if (!operatorId) {
+      return res.status(400).send({ message: "Operator ID is required" });
+    }
+
+    // Find all buses associated with the operator
+    const buses = await BusModel.find({ operator: operatorId }).select("_id");
+
+    if (buses.length === 0) {
+      return res.status(200).json([]); // Return an empty array if no buses are found
+    }
+
+    const busIds = buses.map((bus) => bus._id);
+
+    // Find all bookings associated with the buses
+    const bookings = await BookingModel.find({ bus: { $in: busIds } });
+
+    res.json(bookings); // Return the array of bookings
   } catch (error) {
     res.status(500).json({ error: "Failed to get bookings" });
   }
