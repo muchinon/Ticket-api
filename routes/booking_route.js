@@ -12,7 +12,7 @@ export const bookingRouter = Router();
 
 bookingRouter.post("/api/users/bookings", isAuthenticated, addBooking);
 
-bookingRouter.get("/api/users/bookings", isAuthenticated, getAllBooking);
+bookingRouter.get("/api/users/bus/bookings/:id", getAllBooking);
 
 bookingRouter.get("/api/users/bookings/:id", isAuthenticated, getABooking);
 

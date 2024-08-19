@@ -17,7 +17,7 @@ export const addBooking = async (req, res, next) => {
       return res.status(404).send("User not found");
     }
 
-    const bus = await BusModel.findById(value.bus);
+    const bus = await BusModel.findById(value.bus).populate("operator");
     if (!bus) {
       return res.status(404).send("Bus not found");
     }
@@ -33,6 +33,7 @@ export const addBooking = async (req, res, next) => {
     const createBooking = await BookingModel.create({
       ...value,
       user: id,
+      operator: bus.operator._id, // Set the operator reference
     });
 
     user.bookings.push(createBooking._id);
@@ -56,8 +57,9 @@ export const getABooking = async (req, res, next) => {
 
 export const getAllBooking = async (req, res, next) => {
   try {
-    const userId = req.session?.user?.id || req?.user?.id;
-    const allBooking = await BookingModel.find({ user: userId });
+    const allBooking = await BookingModel.find({ bus: req.params.id }).populate(
+      { path: "user" }
+    );
     res.json(allBooking);
   } catch (error) {
     next(error);

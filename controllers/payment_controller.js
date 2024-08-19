@@ -24,7 +24,7 @@ export const createPayment = async (req, res) => {
       "https://api.paystack.co/transaction/initialize",
       {
         email: email,
-        amount: amount * 100, // Paystack expects amount in kobo
+        amount: amount * 100,
         metadata: {
           seats: selectedSeats,
           userId: req.session?.user?.id || req?.user?.id,
