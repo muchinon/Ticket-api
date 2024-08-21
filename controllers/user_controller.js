@@ -7,6 +7,7 @@ import {
 } from "../schema/user_schema.js";
 import * as bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 import { transporter } from "../config/mail.js";
 
 export const signUp = async (req, res, next) => {
@@ -70,20 +71,66 @@ export const login = async (req, res, next) => {
 };
 
 // Token login
+// export const token = async (req, res, next) => {
+//   try {
+//     const { email, password } = req.body;
+//     //Find a user using their unique identifier
+//     const user = await UserModel.findOne({ email: email });
+//     if (!user) {
+//       res.status(401).json("Invalid email or password");
+//     } else {
+//       //Verify their password
+//       const correctPassword = bcrypt.compareSync(password, user.password);
+//       if (!correctPassword) {
+//         res.status(401).json("Invalid email or password");
+//       } else {
+//         //Generate a token
+//         const token = jwt.sign({ id: user.id }, process.env.JWT_PRIVATE_KEY, {
+//           expiresIn: "5h",
+//         });
+
+//         res.status(200).json({
+//           message: "Login successful",
+//           accessToken: token,
+//           user: {
+//             firstName: user.firstName,
+//             lastName: user.lastName,
+//             username: user.userName,
+//             userId: user.id,
+//             email: user.email,
+//           },
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 export const token = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
-    //Find a user using their unique identifier
+    const { email, password, recaptchaToken } = req.body;
+
+    // Verify ReCAPTCHA token
+    const recaptchaRes = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${recaptchaToken}`
+    );
+
+    if (!recaptchaRes.data.success) {
+      return res.status(400).json({ message: "ReCAPTCHA verification failed" });
+    }
+
+    // Find a user using their unique identifier
     const user = await UserModel.findOne({ email: email });
     if (!user) {
       res.status(401).json("Invalid email or password");
     } else {
-      //Verify their password
+      // Verify their password
       const correctPassword = bcrypt.compareSync(password, user.password);
       if (!correctPassword) {
         res.status(401).json("Invalid email or password");
       } else {
-        //Generate a token
+        // Generate a token
         const token = jwt.sign({ id: user.id }, process.env.JWT_PRIVATE_KEY, {
           expiresIn: "5h",
         });
@@ -94,7 +141,7 @@ export const token = async (req, res, next) => {
           user: {
             firstName: user.firstName,
             lastName: user.lastName,
-            username: user.userName,
+            userName: user.userName,
             userId: user.id,
             email: user.email,
           },
