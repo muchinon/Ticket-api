@@ -33,8 +33,7 @@ export const signUp = async (req, res, next) => {
       await transporter.sendMail({
         to: value.email,
         subject: "User Account Created",
-        text: `Dear user, \n\n A user account has been created with the following credentials. \n\n Username: ${value.username} \n Email: ${value.email} \n\nThank you`,
-        // text: `Dear user, \n\n A user account has been created for you with the following credentials. \n\n Username: ${value.username} \n Email: ${value.email} \nPassword: ${value.password}\nRole: ${value.role}\n\nThank you`,
+        text: `Dear user, \n\n A user account has been created with the following credentials. \n Email: ${value.email} \n\nThank you`,
       });
       return res.status(201).send("User registered successfully");
     }
